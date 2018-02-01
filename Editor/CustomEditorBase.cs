@@ -57,14 +57,15 @@ public class CustomEditorBase : Editor
     {
         var listData = this.GetReorderableList(property);
         listData.IsExpanded.target = property.isExpanded;
-        if ((!listData.IsExpanded.value && !listData.IsExpanded.isAnimating) || (!listData.IsExpanded.value && listData.IsExpanded.isAnimating))
+        //if ((!listData.IsExpanded.value && !listData.IsExpanded.isAnimating) || (!listData.IsExpanded.value && listData.IsExpanded.isAnimating))
+        //{
+        //    EditorGUILayout.BeginHorizontal();
+        //    property.isExpanded = EditorGUILayout.ToggleLeft(string.Format("{0}[]", property.displayName), property.isExpanded, EditorStyles.boldLabel);
+        //    EditorGUILayout.LabelField(string.Format("size: {0}", property.arraySize));
+        //    EditorGUILayout.EndHorizontal();
+        //}
+        //else 
         {
-            EditorGUILayout.BeginHorizontal();
-            property.isExpanded = EditorGUILayout.ToggleLeft(string.Format("{0}[]", property.displayName), property.isExpanded, EditorStyles.boldLabel);
-            EditorGUILayout.LabelField(string.Format("size: {0}", property.arraySize));
-            EditorGUILayout.EndHorizontal();
-        }
-        else {
             if (EditorGUILayout.BeginFadeGroup(listData.IsExpanded.faded))
                 listData.List.DoLayoutList();
             EditorGUILayout.EndFadeGroup();
