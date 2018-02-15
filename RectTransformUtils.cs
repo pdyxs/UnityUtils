@@ -15,4 +15,15 @@ public static class RectTransformUtils {
 
         return r1.Overlaps(r2);
     }
+
+    public static Vector2 RandomAnchorWithin(this RectTransform rt) {
+        return new Vector2(
+            Random.Range(0, rt.sizeDelta.x) - rt.sizeDelta.x * rt.pivot.x,
+            Random.Range(0, rt.sizeDelta.y) - rt.sizeDelta.y * rt.pivot.y
+        );
+    }
+
+    public static Vector3 RelativeAnchorPosition(this RectTransform rt, Canvas canvas, Vector2 anchor) {
+        return rt.position + rt.rotation * anchor.to3D() * canvas.scaleFactor;
+    }
 }
