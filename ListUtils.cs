@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 public static class ListUtils {
     
@@ -32,7 +31,7 @@ public static class ListUtils {
         return list.Union(items.ConvertAll(map)).ToList();
     }
 
-    public static void AddRepeat<T>(this List<T> list, T item, int count) {
+    public static void AddRepeat<T>(this IList<T> list, T item, int count) {
         for (var i = 0; i != count; ++i) {
             list.Add(item);
         }
@@ -45,4 +44,21 @@ public static class ListUtils {
         ret.AddRange(list);
         return ret;
     }
+
+    public static void Shuffle<T>(this IList<T> list, System.Random rnd = null)
+    {
+        if (rnd == null) {
+            rnd = new System.Random();
+        }
+        for (var i = 0; i < list.Count - 1; i++)
+            list.Swap(i, rnd.Next(i, list.Count));
+    }
+
+    public static void Swap<T>(this IList<T> list, int i, int j)
+    {
+        var temp = list[i];
+        list[i] = list[j];
+        list[j] = temp;
+    }
+
 }
