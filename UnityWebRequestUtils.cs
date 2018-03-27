@@ -8,6 +8,8 @@ namespace UnityEngine.Networking
     {
         public static UnityWebRequest Post(string url, object data) {
             var www = UnityWebRequest.Put(url, JsonUtility.ToJson(data));
+            www.chunkedTransfer = false;
+            www.useHttpContinue = false;
             www.method = "POST";
             www.SetRequestHeader("Content-Type", "application/json");
             return www;
