@@ -7,35 +7,16 @@
 
 using UnityEngine;
 
-namespace RoboRyanTron.Unite2017.Variables
+[CreateAssetMenu(menuName = "Variable/Float")]
+public class FloatVariable : ScriptableVariable<float>
 {
-    [CreateAssetMenu]
-    public class FloatVariable : ScriptableObject
+    public void ApplyChange(float amount)
     {
-#if UNITY_EDITOR
-        [Multiline]
-        public string DeveloperDescription = "";
-#endif
-        public float Value;
+        Value += amount;
+    }
 
-        public void SetValue(float value)
-        {
-            Value = value;
-        }
-
-        public void SetValue(FloatVariable value)
-        {
-            Value = value.Value;
-        }
-
-        public void ApplyChange(float amount)
-        {
-            Value += amount;
-        }
-
-        public void ApplyChange(FloatVariable amount)
-        {
-            Value += amount.Value;
-        }
+    public void ApplyChange(IGettable<float> amount)
+    {
+        Value += amount.Value;
     }
 }

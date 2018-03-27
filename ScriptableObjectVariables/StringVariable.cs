@@ -7,18 +7,7 @@
 
 using UnityEngine;
 
-namespace RoboRyanTron.Unite2017.Variables
+[CreateAssetMenu(menuName = "Variable/String")]
+public class StringVariable : ScriptableVariable<string>
 {
-    [CreateAssetMenu]
-    public class StringVariable : ScriptableObject
-    {
-        [SerializeField]
-        private string value = "";
-
-        public string Value
-        {
-            get { return value; }
-            set { this.value = value; }
-        }
-    }
 }
