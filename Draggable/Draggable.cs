@@ -5,13 +5,15 @@ using UnityEngine.EventSystems;
 using UnityEngine.Events;
 using System;
 
-public abstract class Draggable : MonoBehaviour,
-                         IBeginDragHandler,
-                         IDragHandler,
-                         IEndDragHandler,
-                         IPointerEnterHandler,
-                         IPointerExitHandler
+public abstract class Draggable : 
+	MonoBehaviour,
+	IBeginDragHandler,
+	IDragHandler,
+	IEndDragHandler,
+	IPointerEnterHandler,
+	IPointerExitHandler
 {
+	[Serializable]
     public class DragEvent : UnityEvent<Draggable> {}
 	public DragEvent OnCanDragBegin = new DragEvent();
     public DragEvent OnCanDragEnd = new DragEvent();

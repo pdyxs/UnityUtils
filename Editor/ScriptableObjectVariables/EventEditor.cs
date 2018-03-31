@@ -8,20 +8,29 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace RoboRyanTron.Unite2017.Events
+[CustomEditor(typeof(GameEvent), true)]
+public class EventEditor : Editor
 {
-    [CustomEditor(typeof(GameEvent))]
-    public class EventEditor : Editor
+    private static GameObject caller = null;
+    
+    public override void OnInspectorGUI()
     {
-        public override void OnInspectorGUI()
+        base.OnInspectorGUI();
+
+        GUI.enabled = Application.isPlaying;
+        
+        GameEvent e = target as GameEvent;
+
+        caller = (GameObject)EditorGUILayout.ObjectField(caller, typeof(GameObject), true);
+        if (caller != null)
         {
-            base.OnInspectorGUI();
-
-            GUI.enabled = Application.isPlaying;
-
-            GameEvent e = target as GameEvent;
-            if (GUILayout.Button("Raise"))
-                e.Raise();
+            if (GUILayout.Button("Raise Event"))
+                e.Raise(caller);
+        }
+        else
+        {
+            if (GUILayout.Button("Raise All"))
+                e.RaiseAll();
         }
     }
 }

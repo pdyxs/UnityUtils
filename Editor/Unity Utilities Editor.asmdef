@@ -1,7 +1,8 @@
 {
     "name": "UnityUtilitiesEditor",
     "references": [
-        "UnityUitilities"
+        "UnityUitilities",
+        "DotNetUtilsEditor"
     ],
     "includePlatforms": [
         "Editor"
