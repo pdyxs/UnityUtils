@@ -2,8 +2,33 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Events;
-using System;
+
+public interface IMoveableHandler
+{
+	void OnMoveBegin(Vector2 position);
+	void OnMoveContinue(Vector2 position);
+	void OnMoveEnd(Vector2 position);
+}
+
+public interface IDraggableHandler
+{
+	void OnCanDragBegin();
+	void OnCanDragEnd();
+	void OnCanDropBegin(Droppable droppable);
+	void OnCanDropEnd(Droppable droppable);
+	void OnDrop(Droppable droppable);
+	void OnFailedDrop();
+}
+
+public interface ICanDropOnSpecifier
+{
+	bool CanDrop(Droppable droppable);
+}
+
+public interface ICanDragSpecifier
+{
+	bool CanDrag();
+}
 
 public abstract class Draggable : 
 	MonoBehaviour,
@@ -13,12 +38,10 @@ public abstract class Draggable :
 	IPointerEnterHandler,
 	IPointerExitHandler
 {
-	[Serializable]
-    public class DragEvent : UnityEvent<Draggable> {}
-	public DragEvent OnCanDragBegin = new DragEvent();
-    public DragEvent OnCanDragEnd = new DragEvent();
-    public DragEvent OnDragBegun = new DragEvent();
-    public DragEvent OnDragEnded = new DragEvent();
+	private IDraggableHandler[] draggableHandlers;
+	private IMoveableHandler[] moveableHandlers;
+	private ICanDropOnSpecifier canDropOnSpecifier;
+	private ICanDragSpecifier canDragSpecifier;
 
 	private static List<Draggable> dragging = new List<Draggable>();
 
@@ -27,33 +50,47 @@ public abstract class Draggable :
 		return dragging.Find((obj) => obj.pointerId == pointerId);
 	}
 
-	public abstract CanvasGroup DraggedObjectCanvasGroup
-	{
-        get;
-	}
+	[DefaultOwnerObject]
+	public CanvasGroup DraggedObjectCanvasGroup;
 
 	public int pointerId
 	{
 		get; private set;
 	}
-    
-    public void OnBeginDrag(PointerEventData eventData)
+
+	private void Start()
+	{
+		moveableHandlers = GetComponents<IMoveableHandler>();
+		draggableHandlers = GetComponents<IDraggableHandler>();
+		canDropOnSpecifier = GetComponent<ICanDropOnSpecifier>();
+		canDragSpecifier = GetComponent<ICanDragSpecifier>();
+	}
+
+	public void OnBeginDrag(PointerEventData eventData)
     {
         if (FindDragging(eventData.pointerId) == null && CanDrag(eventData)) {
-            InitialiseDrag(eventData);
             dragging.Add(this);
-            DraggedObjectCanvasGroup.blocksRaycasts = false;
-            this.pointerId = eventData.pointerId;
+	        if (DraggedObjectCanvasGroup != null)
+	        {
+		        DraggedObjectCanvasGroup.blocksRaycasts = false;
+	        }
+	        this.pointerId = eventData.pointerId;
             IsHoveringOver = null;
             HasDropped = false;
-            OnDragBegun.Invoke(this);
+	        foreach (var h in moveableHandlers)
+	        {
+		        h.OnMoveBegin(eventData.position);
+	        }
         }
     }
 
     public void OnDrag(PointerEventData eventData)
     {
         if (FindDragging(eventData.pointerId) == this) {
-            ContinueDrag(eventData);
+	        foreach (var h in moveableHandlers)
+	        {
+		        h.OnMoveContinue(eventData.position);
+	        }
         }
     }
 
@@ -72,14 +109,19 @@ public abstract class Draggable :
             {
 				if (!HasDropped)
 				{
-					NotDropped(eventData);
+					foreach (var h in draggableHandlers)
+					{
+						h.OnFailedDrop();
+					}
 				}
             } else {
                 DropOn(IsHoveringOver);
             }
 
-
-            OnDragEnded.Invoke(this);
+			foreach (var h in moveableHandlers)
+			{
+				h.OnMoveEnd(eventData.position);
+			}
 		}
 		dragging.Remove(this);
     }
@@ -90,13 +132,23 @@ public abstract class Draggable :
         get; private set;
     }
 
-    protected abstract bool CanDrag(PointerEventData eventData);
-    protected abstract void InitialiseDrag(PointerEventData eventData);
-    protected abstract void ContinueDrag(PointerEventData eventData);
+	protected bool CanDrag(PointerEventData eventData)
+	{
+		if (canDragSpecifier != null)
+		{
+			return canDragSpecifier.CanDrag();
+		}
+
+		return true;
+	}
 
     public bool TryHover(Droppable d) {
-        if (StartHoverOver(d)) {
+        if (CanDropOn(d)) {
             IsHoveringOver = d;
+	        foreach (var h in draggableHandlers)
+	        {
+		        h.OnCanDropBegin(d);
+	        }
             return true;
         }
         return false;
@@ -104,25 +156,43 @@ public abstract class Draggable :
 
     public void EndHover(Droppable d) {
         IsHoveringOver = null;
-        EndHoverOver(d);
+	    foreach (var h in draggableHandlers)
+	    {
+		    h.OnCanDropEnd(d);
+	    }
     }
 
     public void DropOn(Droppable d) {
         IsHoveringOver = null;
         HasDropped = true;
-        Dropped(d);
+	    foreach (var h in draggableHandlers)
+	    {
+		    h.OnDrop(d);
+	    }
     }
 
-    protected abstract void Dropped(Droppable d);
-    protected abstract void NotDropped(PointerEventData eventData);
+	public bool CanDropOn(Droppable d)
+	{
+		if (!d.CanDrop(this))
+		{
+			return false;
+		}
 
-    public abstract bool StartHoverOver(Droppable d);
-    public abstract void EndHoverOver(Droppable d);
+		if (canDropOnSpecifier != null)
+		{
+			return canDropOnSpecifier.CanDrop(d);
+		}
+
+		return true;
+	}
 
     public void OnPointerEnter(PointerEventData eventData)
     {
         if (FindDragging(eventData.pointerId) == null && CanDrag(eventData)) {
-            OnCanDragBegin.Invoke(this);
+	        foreach (var h in draggableHandlers)
+	        {
+		        h.OnCanDragBegin();
+	        }
         }
     }
 
@@ -130,7 +200,10 @@ public abstract class Draggable :
     {
 		if (FindDragging(eventData.pointerId) == null && CanDrag(eventData))
 		{
-            OnCanDragEnd.Invoke(this);
+			foreach (var h in draggableHandlers)
+			{
+				h.OnCanDragEnd();
+			}
 		}
     }
 }

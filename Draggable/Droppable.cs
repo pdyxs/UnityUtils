@@ -1,18 +1,37 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TypeReferences;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Events;
 
-public abstract class Droppable : MonoBehaviour,
-                                  IDropHandler,
-                                  IPointerEnterHandler,
-                                  IPointerExitHandler {
-    
-	public class DragDropEvent : UnityEvent<Draggable, Droppable> { }
-    public DragDropEvent OnHoverStart = new DragDropEvent();
-    public DragDropEvent OnHoverEnd = new DragDropEvent();
-    public DragDropEvent OnDropped = new DragDropEvent();
+public interface IDroppableHandler
+{
+    void OnHoverStart(Draggable draggable);
+    void OnHoverEnd(Draggable draggable);
+    void OnDropped(Draggable draggable);
+}
+
+public interface ICanBeDroppedSpecifier
+{
+    bool CanDrop(Draggable dragged);
+}
+
+public class Droppable : 
+    MonoBehaviour,
+    IDropHandler,
+    IPointerEnterHandler,
+    IPointerExitHandler
+{
+    private IDroppableHandler[] droppableHandlers;
+
+    private ICanBeDroppedSpecifier canBeDroppedSpecifier;
+
+    private void Start()
+    {
+        droppableHandlers = GetComponents<IDroppableHandler>();
+        canBeDroppedSpecifier = GetComponent<ICanBeDroppedSpecifier>();
+    }
 
     public void OnDrop(PointerEventData eventData)
     {
@@ -20,7 +39,10 @@ public abstract class Droppable : MonoBehaviour,
         if (dragged != null &&
             dragged.IsHoveringOver == this) {
             dragged.DropOn(this);
-            OnDropped.Invoke(dragged, this);
+            foreach (var handler in droppableHandlers)
+            {
+                handler.OnDropped(dragged);
+            }
         }
     }
 
@@ -31,7 +53,10 @@ public abstract class Droppable : MonoBehaviour,
 			CanDrop(dragged) && 
 			dragged.TryHover(this))
 		{
-            OnHoverStart.Invoke(dragged, this);
+		    foreach (var handler in droppableHandlers)
+		    {
+		        handler.OnHoverStart(dragged);
+		    }
 		}
     }
 
@@ -40,9 +65,20 @@ public abstract class Droppable : MonoBehaviour,
 		var dragged = Draggable.FindDragging(eventData.pointerId);
         if (dragged != null && dragged.IsHoveringOver == this) {
             dragged.EndHover(this);
-            OnHoverEnd.Invoke(dragged, this);
+            foreach (var handler in droppableHandlers)
+            {
+                handler.OnHoverEnd(dragged);
+            }
         }
     }
 
-    protected abstract bool CanDrop(Draggable dragged);
+    public bool CanDrop(Draggable dragged)
+    {
+        if (canBeDroppedSpecifier != null)
+        {
+            return canBeDroppedSpecifier.CanDrop(dragged);
+        }
+
+        return true;
+    }
 }
