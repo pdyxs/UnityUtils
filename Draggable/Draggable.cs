@@ -30,7 +30,7 @@ public interface ICanDragSpecifier
 	bool CanDrag();
 }
 
-public abstract class Draggable : 
+public class Draggable : 
 	MonoBehaviour,
 	IBeginDragHandler,
 	IDragHandler,
@@ -50,9 +50,6 @@ public abstract class Draggable :
 		return dragging.Find((obj) => obj.pointerId == pointerId);
 	}
 
-	[DefaultOwnerObject]
-	public CanvasGroup DraggedObjectCanvasGroup;
-
 	public int pointerId
 	{
 		get; private set;
@@ -70,10 +67,6 @@ public abstract class Draggable :
     {
         if (FindDragging(eventData.pointerId) == null && CanDrag(eventData)) {
             dragging.Add(this);
-	        if (DraggedObjectCanvasGroup != null)
-	        {
-		        DraggedObjectCanvasGroup.blocksRaycasts = false;
-	        }
 	        this.pointerId = eventData.pointerId;
             IsHoveringOver = null;
             HasDropped = false;
@@ -98,10 +91,6 @@ public abstract class Draggable :
     {
 		if (FindDragging(eventData.pointerId) == this)
 		{
-			if (DraggedObjectCanvasGroup != null)
-			{
-				DraggedObjectCanvasGroup.blocksRaycasts = true;
-            }
             dragging.Remove(this);
             this.pointerId = int.MinValue;
 
