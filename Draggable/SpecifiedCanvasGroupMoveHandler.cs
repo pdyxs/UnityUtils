@@ -2,25 +2,44 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CanvasGroupMoveHandler : 
+public class SpecifiedCanvasGroupMoveHandler : 
 	MonoBehaviour,
-	IMoveableHandler,
-	IMovingProvider
+	IMoveableHandler
 {
-	[DefaultOwnerObject]
-	public CanvasGroup draggedCanvasGroup;
+	[DefaultOwnerObject] public Transform draggingParent;
 
+	private Vector2 dragDelta;
+
+	public CanvasGroup draggedCanvasGroup
+	{
+		get
+		{
+			if (_draggedCanvasGroup == null)
+			{
+				var imoveable = GetComponent<IMovingProvider>();
+				if (imoveable != null && imoveable.MovingObject != null)
+				{
+					_draggedCanvasGroup = imoveable.MovingObject.GetComponent<CanvasGroup>();
+				}
+			}
+
+			return _draggedCanvasGroup;
+		}
+	}
+
+	private CanvasGroup _draggedCanvasGroup;
+	
 	public RectTransform draggedRectTransform
 	{
 		get
 		{
+			if (draggedCanvasGroup == null)
+			{
+				return null;
+			}
 			return draggedCanvasGroup.transform as RectTransform;
 		}
 	}
-
-	[DefaultOwnerObject] public Transform draggingParent;
-
-	private Vector2 dragDelta;
 
 	public void OnMoveBegin(Vector2 position)
 	{
@@ -46,6 +65,4 @@ public class CanvasGroupMoveHandler :
 			draggedCanvasGroup.blocksRaycasts = true;
 		}
 	}
-
-	public GameObject MovingObject => draggedCanvasGroup.gameObject;
 }

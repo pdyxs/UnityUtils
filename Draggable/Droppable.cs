@@ -5,11 +5,15 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Events;
 
-public interface IDroppableHandler
+public interface IDroppableDroppedHandler
+{
+    void OnDropped(Draggable draggable);
+}
+
+public interface IDroppableHoverHandler
 {
     void OnHoverStart(Draggable draggable);
     void OnHoverEnd(Draggable draggable);
-    void OnDropped(Draggable draggable);
 }
 
 public interface ICanBeDroppedSpecifier
@@ -23,13 +27,15 @@ public class Droppable :
     IPointerEnterHandler,
     IPointerExitHandler
 {
-    private IDroppableHandler[] droppableHandlers;
+    private IDroppableDroppedHandler[] dropHandlers;
+    private IDroppableHoverHandler[] hoverHandlers;
 
     private ICanBeDroppedSpecifier canBeDroppedSpecifier;
 
     private void Start()
     {
-        droppableHandlers = GetComponents<IDroppableHandler>();
+        dropHandlers = GetComponents<IDroppableDroppedHandler>();
+        hoverHandlers = GetComponents<IDroppableHoverHandler>();
         canBeDroppedSpecifier = GetComponent<ICanBeDroppedSpecifier>();
     }
 
@@ -39,7 +45,7 @@ public class Droppable :
         if (dragged != null &&
             dragged.IsHoveringOver == this) {
             dragged.DropOn(this);
-            foreach (var handler in droppableHandlers)
+            foreach (var handler in dropHandlers)
             {
                 handler.OnDropped(dragged);
             }
@@ -53,7 +59,7 @@ public class Droppable :
 			CanDrop(dragged) && 
 			dragged.TryHover(this))
 		{
-		    foreach (var handler in droppableHandlers)
+		    foreach (var handler in hoverHandlers)
 		    {
 		        handler.OnHoverStart(dragged);
 		    }
@@ -65,7 +71,7 @@ public class Droppable :
 		var dragged = Draggable.FindDragging(eventData.pointerId);
         if (dragged != null && dragged.IsHoveringOver == this) {
             dragged.EndHover(this);
-            foreach (var handler in droppableHandlers)
+            foreach (var handler in hoverHandlers)
             {
                 handler.OnHoverEnd(dragged);
             }

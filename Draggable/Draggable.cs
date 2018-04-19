@@ -10,14 +10,31 @@ public interface IMoveableHandler
 	void OnMoveEnd(Vector2 position);
 }
 
-public interface IDraggableHandler
+public interface IDraggableStartDragHandler
+{
+	void OnDragBegin();
+}
+
+public interface IDraggableFailedDropHandler
+{
+	void OnFailedDrop();
+}
+
+public interface IDraggableCanDragHandler
 {
 	void OnCanDragBegin();
 	void OnCanDragEnd();
+}
+
+public interface IDraggableCanDropHandler
+{
 	void OnCanDropBegin(Droppable droppable);
 	void OnCanDropEnd(Droppable droppable);
+}
+
+public interface IDraggableDroppedHandler
+{
 	void OnDrop(Droppable droppable);
-	void OnFailedDrop();
 }
 
 public interface ICanDropOnSpecifier
@@ -38,7 +55,11 @@ public class Draggable :
 	IPointerEnterHandler,
 	IPointerExitHandler
 {
-	private IDraggableHandler[] draggableHandlers;
+	private IDraggableCanDragHandler[] canDragHandlers;
+	private IDraggableCanDropHandler[] canDropHandlers;
+	private IDraggableDroppedHandler[] droppedHandlers;
+	private IDraggableFailedDropHandler[] failedDropHandlers;
+	private IDraggableStartDragHandler[] startDragHandlers;
 	private IMoveableHandler[] moveableHandlers;
 	private ICanDropOnSpecifier canDropOnSpecifier;
 	private ICanDragSpecifier canDragSpecifier;
@@ -58,7 +79,11 @@ public class Draggable :
 	private void Start()
 	{
 		moveableHandlers = GetComponents<IMoveableHandler>();
-		draggableHandlers = GetComponents<IDraggableHandler>();
+		failedDropHandlers = GetComponents<IDraggableFailedDropHandler>();
+		canDragHandlers = GetComponents<IDraggableCanDragHandler>();
+		canDropHandlers = GetComponents<IDraggableCanDropHandler>();
+		startDragHandlers = GetComponents<IDraggableStartDragHandler>();
+		droppedHandlers = GetComponents<IDraggableDroppedHandler>();
 		canDropOnSpecifier = GetComponent<ICanDropOnSpecifier>();
 		canDragSpecifier = GetComponent<ICanDragSpecifier>();
 	}
@@ -73,6 +98,11 @@ public class Draggable :
 	        foreach (var h in moveableHandlers)
 	        {
 		        h.OnMoveBegin(eventData.position);
+	        }
+
+	        foreach (var h in startDragHandlers)
+	        {
+		        h.OnDragBegin();
 	        }
         }
     }
@@ -98,7 +128,7 @@ public class Draggable :
             {
 				if (!HasDropped)
 				{
-					foreach (var h in draggableHandlers)
+					foreach (var h in failedDropHandlers)
 					{
 						h.OnFailedDrop();
 					}
@@ -134,7 +164,7 @@ public class Draggable :
     public bool TryHover(Droppable d) {
         if (CanDropOn(d)) {
             IsHoveringOver = d;
-	        foreach (var h in draggableHandlers)
+	        foreach (var h in canDropHandlers)
 	        {
 		        h.OnCanDropBegin(d);
 	        }
@@ -145,7 +175,7 @@ public class Draggable :
 
     public void EndHover(Droppable d) {
         IsHoveringOver = null;
-	    foreach (var h in draggableHandlers)
+	    foreach (var h in canDropHandlers)
 	    {
 		    h.OnCanDropEnd(d);
 	    }
@@ -154,7 +184,7 @@ public class Draggable :
     public void DropOn(Droppable d) {
         IsHoveringOver = null;
         HasDropped = true;
-	    foreach (var h in draggableHandlers)
+	    foreach (var h in droppedHandlers)
 	    {
 		    h.OnDrop(d);
 	    }
@@ -178,7 +208,7 @@ public class Draggable :
     public void OnPointerEnter(PointerEventData eventData)
     {
         if (FindDragging(eventData.pointerId) == null && CanDrag(eventData)) {
-	        foreach (var h in draggableHandlers)
+	        foreach (var h in canDragHandlers)
 	        {
 		        h.OnCanDragBegin();
 	        }
@@ -189,7 +219,7 @@ public class Draggable :
     {
 		if (FindDragging(eventData.pointerId) == null && CanDrag(eventData))
 		{
-			foreach (var h in draggableHandlers)
+			foreach (var h in canDragHandlers)
 			{
 				h.OnCanDragEnd();
 			}
