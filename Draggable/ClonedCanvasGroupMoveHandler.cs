@@ -9,7 +9,7 @@ public class ClonedCanvasGroupMoveHandler :
 {
 	public CanvasGroup draggablePrefab;
 
-	[DefaultOwnerObject] public Transform draggingParent;
+	public TransformReference draggingParent;
 
 	private CanvasGroup draggable;
 	private CanvasGroup dragging;
@@ -33,7 +33,7 @@ public class ClonedCanvasGroupMoveHandler :
 	{
 		if (draggable != null)
 		{
-			dragging = draggablePrefab.Spawn(draggingParent);
+			dragging = draggablePrefab.Spawn(draggingParent.Get(this));
 			dragging.blocksRaycasts = false;
 			dragDelta = draggingRectTransform.position.to2D() - position;
 		}

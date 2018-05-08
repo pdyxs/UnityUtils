@@ -6,7 +6,7 @@ public class SpecifiedCanvasGroupMoveHandler :
 	MonoBehaviour,
 	IMoveableHandler
 {
-	[DefaultOwnerObject] public Transform draggingParent;
+	public TransformReference draggingParent;
 
 	private Vector2 dragDelta;
 
@@ -45,6 +45,7 @@ public class SpecifiedCanvasGroupMoveHandler :
 	{
 		if (draggedCanvasGroup != null)
 		{
+			draggedCanvasGroup.transform.SetParent(draggingParent.Get(this), true);
 			draggedCanvasGroup.blocksRaycasts = false;
 			dragDelta = draggedRectTransform.position.to2D() - position;
 		}

@@ -6,7 +6,7 @@ public class CaptureOnDragSucceed :
 	MonoBehaviour,
 	IDroppableDroppedHandler
 {
-	[DefaultOwnerObject] public Transform captor;
+	public TransformReference captor;
 	
 	public void OnDropped(Draggable draggable)
 	{
@@ -16,6 +16,6 @@ public class CaptureOnDragSucceed :
 		{
 			obj = imoving.MovingObject.transform;
 		}
-		obj.SetParent(captor);
+		obj.SetParent(captor.Get(this));
 	}
 }
