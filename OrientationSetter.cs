@@ -18,6 +18,7 @@ public class OrientationSetter : MonoBehaviour {
 	}
 
 	public void SetRotation () {
+		#if UNITY_IOS
 		switch (deviceType)
 		{
 			case DeviceTypes.iPad:
@@ -26,5 +27,6 @@ public class OrientationSetter : MonoBehaviour {
 				return;
 		}
 		Screen.orientation = orientation;
+		#endif
 	}
 }

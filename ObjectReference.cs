@@ -16,25 +16,42 @@ public class ObjectReference<T> : ObjectReference
 
 	private bool initialised = false;
 
+	public T Find(GameObject self)
+	{
+		switch (reference)
+		{
+			case Reference.None:
+				return null;
+			case Reference.Self:
+				return self.GetComponent<T>();
+			case Reference.Parent:
+				return self.transform.parent.GetComponent<T>();
+			case Reference.Ancestor:
+				var p = self.transform.parent;
+				T ret = null;
+				while (ret == null)
+				{
+					if (p == null)
+					{
+						break;
+					}
+					ret = p.GetComponent<T>();
+					p = p.parent;
+				}
+				return ret;
+			case Reference.Other:
+				return obj;
+		}
+
+		return obj;
+	}
+
 	public T Get(GameObject self)
 	{
 		if (!initialised)
 		{
 			initialised = true;
-			switch (reference)
-			{
-				case Reference.None:
-					obj = null;
-					break;
-				case Reference.Self:
-					obj = self.GetComponent<T>();
-					break;
-				case Reference.Parent:
-					obj = self.transform.parent.GetComponent<T>();
-					break;
-				case Reference.Other:
-					break;
-			}
+			obj = Find(self);
 		}
 
 		return obj;
@@ -53,6 +70,7 @@ public abstract class ObjectReference
 		None,
 		Self,
 		Parent,
+		Ancestor,
 		Other
 	}
 
