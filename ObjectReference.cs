@@ -1,12 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 [System.Serializable]
 public class TransformReference : ObjectReference<Transform> {}
 
 [System.Serializable]
 public class RectTransformReference : ObjectReference<RectTransform> {}
+
+[System.Serializable]
+public class TextReference : ObjectReference<Text> {}
 
 public class ObjectReference<T> : ObjectReference
 	where T : Component
