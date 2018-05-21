@@ -21,6 +21,9 @@ public class ObjectReference<T> : ObjectReference
 
 	private bool initialised = false;
 
+	private Transform _myParent;
+	private Transform _refParent;
+
 	public T Find(GameObject self)
 	{
 		switch (reference)
@@ -32,7 +35,8 @@ public class ObjectReference<T> : ObjectReference
 			case Reference.Parent:
 				return self.transform.parent.GetComponent<T>();
 			case Reference.Ancestor:
-				var p = self.transform.parent;
+				_myParent = self.transform.parent;
+				var p = _myParent;
 				T ret = null;
 				while (ret == null)
 				{
@@ -43,9 +47,20 @@ public class ObjectReference<T> : ObjectReference
 					ret = p.GetComponent<T>();
 					p = p.parent;
 				}
+
+				if (ret != null)
+				{
+					_refParent = ret.transform.parent;
+				}
 				return ret;
 			case Reference.Child:
-				return self.GetComponentInChildren<T>();
+				_myParent = self.transform.parent;
+				var r = self.GetComponentInChildren<T>();
+				if (r != null)
+				{
+					_refParent = r.transform.parent;
+				}
+				return r;
 			case Reference.Other:
 				return obj;
 		}
@@ -57,12 +72,13 @@ public class ObjectReference<T> : ObjectReference
 	{
 		switch (reference)
 		{
-			case Reference.None:
-				return true;
 			case Reference.Self:
 				return obj.gameObject == self;
 			case Reference.Parent:
 				return obj.gameObject == self.transform.parent.gameObject;
+			case Reference.Ancestor:
+			case Reference.Child:
+				return self.transform.parent == _myParent && obj && obj.transform.parent == _refParent;
 		}
 
 		return true;
