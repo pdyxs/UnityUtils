@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
 public interface IMoveableHandler
@@ -71,6 +72,10 @@ public class Draggable :
 		return dragging.Find((obj) => obj.pointerId == pointerId);
 	}
 
+	public class DraggableEvent : UnityEvent<Draggable> {}
+	public static DraggableEvent OnDragBegun = new DraggableEvent(); 
+	public static DraggableEvent OnDragEnded = new DraggableEvent(); 
+
 	public int pointerId
 	{
 		get; private set;
@@ -104,6 +109,8 @@ public class Draggable :
 	        {
 		        h.OnDragBegin();
 	        }
+
+	        OnDragBegun.Invoke(this);
         }
     }
 
@@ -141,6 +148,8 @@ public class Draggable :
 			{
 				h.OnMoveEnd(eventData.position);
 			}
+			
+			OnDragEnded.Invoke(this);
 		}
 		dragging.Remove(this);
     }

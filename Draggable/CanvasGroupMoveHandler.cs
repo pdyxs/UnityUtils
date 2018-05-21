@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CanvasGroupMoveHandler : 
 	MonoBehaviour,
@@ -27,6 +28,11 @@ public class CanvasGroupMoveHandler :
 		if (draggedCanvasGroup != null)
 		{
 			draggedCanvasGroup.blocksRaycasts = false;
+			var layout = draggedCanvasGroup.GetComponent<LayoutElement>();
+			if (layout != null)
+			{
+				layout.ignoreLayout = true;
+			}
 			dragDelta = draggedRectTransform.position.to2D() - position;
 		}
 	}

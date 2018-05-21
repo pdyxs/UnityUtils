@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CaptureOnDragSucceed : 
 	MonoBehaviour,
@@ -16,6 +17,13 @@ public class CaptureOnDragSucceed :
 		{
 			obj = imoving.MovingObject.transform;
 		}
+		
+		var layout = obj.GetComponent<LayoutElement>();
+		if (layout != null)
+		{
+			layout.ignoreLayout = false;
+		}
+		
 		obj.SetParent(captor.Get(this));
 	}
 }

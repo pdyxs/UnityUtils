@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ClonedCanvasGroupMoveHandler : 
 	MonoBehaviour,
@@ -35,6 +36,11 @@ public class ClonedCanvasGroupMoveHandler :
 		{
 			dragging = draggablePrefab.Spawn(draggingParent.Get(this));
 			dragging.blocksRaycasts = false;
+			var layout = dragging.GetComponent<LayoutElement>();
+			if (layout != null)
+			{
+				layout.ignoreLayout = true;
+			}
 			dragDelta = draggingRectTransform.position.to2D() - position;
 		}
 	}
