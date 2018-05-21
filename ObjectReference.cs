@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.UI;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -43,6 +44,8 @@ public class ObjectReference<T> : ObjectReference
 					p = p.parent;
 				}
 				return ret;
+			case Reference.Child:
+				return self.GetComponentInChildren<T>();
 			case Reference.Other:
 				return obj;
 		}
@@ -50,14 +53,29 @@ public class ObjectReference<T> : ObjectReference
 		return obj;
 	}
 
+	public bool Check(GameObject self)
+	{
+		switch (reference)
+		{
+			case Reference.None:
+				return true;
+			case Reference.Self:
+				return obj.gameObject == self;
+			case Reference.Parent:
+				return obj.gameObject == self.transform.parent.gameObject;
+		}
+
+		return true;
+	}
+
 	public T Get(GameObject self)
 	{
-		if (!initialised)
+		if (!initialised || !Check(self))
 		{
 			initialised = true;
 			obj = Find(self);
 		}
-
+		
 		return obj;
 	}
 
@@ -75,6 +93,7 @@ public abstract class ObjectReference
 		Self,
 		Parent,
 		Ancestor,
+		Child,
 		Other
 	}
 
