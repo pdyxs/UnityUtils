@@ -35,6 +35,7 @@ public class ClonedCanvasGroupMoveHandler :
 		if (draggable != null)
 		{
 			dragging = draggablePrefab.Spawn(draggingParent.Get(this));
+			dragging.transform.position = transform.position;
 			dragging.blocksRaycasts = false;
 			var layout = dragging.GetComponent<LayoutElement>();
 			if (layout != null)
