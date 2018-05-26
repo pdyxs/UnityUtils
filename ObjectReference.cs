@@ -87,6 +87,11 @@ public class ObjectReference<T> : ObjectReference
 		return obj;
 	}
 
+	public bool Check(Component self)
+	{
+		return Check(self.gameObject);
+	}
+
 	public bool Check(GameObject self)
 	{
 		switch (reference)
@@ -115,7 +120,7 @@ public class ObjectReference<T> : ObjectReference
 		return obj;
 	}
 
-	public T Get(MonoBehaviour self)
+	public T Get(Component self)
 	{
 		return Get(self.gameObject);
 	}
