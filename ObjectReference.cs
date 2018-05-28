@@ -13,7 +13,7 @@ public class RectTransformReference : ObjectReference<RectTransform> {}
 public class TextReference : ObjectReference<Text> {}
 
 public class ObjectReference<T> : ObjectReference
-	where T : Component
+	where T : class
 {
 	[SerializeField]
 	private T obj;
@@ -29,14 +29,14 @@ public class ObjectReference<T> : ObjectReference
 		switch (reference)
 		{
 			case Reference.None:
-				return null;
+				return default(T);
 			case Reference.Self:
 				return self.GetComponent<T>();
 			case Reference.Parent:
 				return self.transform.parent.GetComponent<T>();
 			case Reference.Ancestor:
 				_myParent = p;
-				T ret = null;
+				T ret = default(T);
 				while (ret == null)
 				{
 					if (p == null)
@@ -47,10 +47,7 @@ public class ObjectReference<T> : ObjectReference
 					p = p.parent;
 				}
 
-				if (ret != null)
-				{
-					_refParent = ret.transform.parent;
-				}
+				_refParent = (ret as Component)?.transform.parent;
 				return ret;
 			case Reference.TopLevelAncestor:
 				_myParent = p;
@@ -66,19 +63,13 @@ public class ObjectReference<T> : ObjectReference
 					p = p.parent;
 				}
 
-				if (lastFound != null)
-				{
-					_refParent = lastFound.transform.parent;
-				}
+				_refParent = (lastFound as Component)?.transform.parent;
 
 				return lastFound;
 			case Reference.Child:
 				_myParent = p;
 				var r = self.GetComponentInChildren<T>();
-				if (r != null)
-				{
-					_refParent = r.transform.parent;
-				}
+				_refParent = (r as Component)?.transform.parent;
 				return r;
 			case Reference.Other:
 				return obj;
@@ -97,13 +88,15 @@ public class ObjectReference<T> : ObjectReference
 		switch (reference)
 		{
 			case Reference.Self:
-				return obj.gameObject == self;
+				return (obj as Component)?.gameObject == self;
 			case Reference.Parent:
-				return obj.gameObject == self.transform.parent.gameObject;
+				return (obj as Component)?.gameObject == self.transform.parent.gameObject;
 			case Reference.Ancestor:
 			case Reference.TopLevelAncestor:
 			case Reference.Child:
-				return self.transform.parent == _myParent && obj && obj.transform.parent == _refParent;
+				return (self.transform.parent == _myParent) && 
+				       obj != null && 
+				       (obj as Component)?.transform.parent == _refParent;
 		}
 
 		return true;
