@@ -4,26 +4,14 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class ClonedCanvasGroupMoveHandler : 
-	MonoBehaviour,
+	CanvasGroupMover,
 	IMoveableHandler,
 	IMovingProvider
 {
 	public CanvasGroup draggablePrefab;
 
-	public TransformReference draggingParent;
-
 	private CanvasGroup draggable;
 	private CanvasGroup dragging;
-
-	public RectTransform draggingRectTransform
-	{
-		get
-		{
-			return dragging.transform as RectTransform;
-		}
-	}
-
-	private Vector2 dragDelta;
 
 	private void Start()
 	{
@@ -36,31 +24,20 @@ public class ClonedCanvasGroupMoveHandler :
 		{
 			dragging = draggablePrefab.Spawn(draggingParent.Get(this));
 			dragging.transform.position = transform.position;
-			dragging.blocksRaycasts = false;
-			var layout = dragging.GetComponent<LayoutElement>();
-			if (layout != null)
-			{
-				layout.ignoreLayout = true;
-			}
-			dragDelta = draggingRectTransform.position.to2D() - position;
+			StartMove(position);
 		}
 	}
 
 	public void OnMoveContinue(Vector2 position)
 	{
-		if (dragging != null)
-		{
-			draggingRectTransform.position = (position + dragDelta).to3D();
-		}
+		ContinueMove(position);
 	}
 
 	public void OnMoveEnd(Vector2 position)
 	{
-		if (dragging != null)
-		{
-			dragging.blocksRaycasts = true;
-		}
+		EndMove(position);
 	}
 	
 	public GameObject MovingObject => dragging.gameObject;
+	public override CanvasGroup draggedCanvasGroup => dragging;
 }
