@@ -95,7 +95,7 @@ public class ObjectReference<T> : ObjectReference
 			case Reference.TopLevelAncestor:
 			case Reference.Child:
 				return (self.transform.parent == _myParent) && 
-				       obj != null && 
+				       obj != null && (obj as Component) != null && _refParent != null &&
 				       (obj as Component)?.transform.parent == _refParent;
 		}
 
